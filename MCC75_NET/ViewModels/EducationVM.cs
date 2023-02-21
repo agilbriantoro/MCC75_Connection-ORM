@@ -7,7 +7,8 @@ namespace MCC75_NET.ViewModels
         public int Id { get; set; }
         public string Major { get; set; }
 
-        [Range(2, 2, ErrorMessage = "Contoh Inputan ex: S1")]
+        [MaxLength(2), MinLength(2, ErrorMessage = "Example of Degree Input: S1/D3")]
+        [Required(ErrorMessage = "Example of Degree Input: S1/D3")]
         public string Degree { get; set; }
 
         [Range(0, 4, ErrorMessage = "Contoh Inputan ex: 3.9")]

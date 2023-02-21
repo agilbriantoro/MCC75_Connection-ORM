@@ -51,7 +51,7 @@ namespace MCC75_NET.Controllers
                     Value = u.Id.ToString(),
                     Text = u.Name
                 });
-            ViewBag.Universities = universities;
+            ViewBag.UniversityId = universities;
             return View();
         }
         [HttpPost]
