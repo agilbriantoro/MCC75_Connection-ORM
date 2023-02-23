@@ -28,7 +28,6 @@ namespace MCC75_NET.Models
         //Cardinality
         public ICollection<Profilling>? profillings { get; set;}
         public Account? Account { get; set; }  
-
     }
 public enum GenderEnum
 {
