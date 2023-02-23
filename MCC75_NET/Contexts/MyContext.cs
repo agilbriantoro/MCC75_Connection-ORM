@@ -19,11 +19,11 @@ namespace MCC75_NET.Contexts
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Employee>().HasAlternateKey(e => new
+           /* modelBuilder.Entity<Employee>().HasAlternateKey(e => new
             {
                 e.Email,
                 e.PhoneNumber
-            });
+            });*/
 
             modelBuilder.Entity<Employee>()
                 .HasOne(e => e.Account)

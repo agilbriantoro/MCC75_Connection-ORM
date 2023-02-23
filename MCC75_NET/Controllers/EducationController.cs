@@ -9,7 +9,7 @@ namespace MCC75_NET.Controllers
     public class EducationController : Controller
     {
         private readonly MyContext context;
-        private readonly EducationVM educationVM;
+        private readonly EducationUniversityVM educationVM;
         public EducationController(MyContext context)
         {
             this.context = context;
@@ -20,7 +20,7 @@ namespace MCC75_NET.Controllers
                 context.Universities,
                 e => e.UniversityId,
                 u => u.Id,
-                (e, u) => new EducationVM
+                (e, u) => new EducationUniversityVM
                 {
                     Id = e.Id,
                     Degree = e.degree,
@@ -34,7 +34,7 @@ namespace MCC75_NET.Controllers
         public IActionResult Details(int id)
         {
             var education = context.Educations.Find(id);
-            return View(new EducationVM
+            return View(new EducationUniversityVM
             {
                 Id = education.Id,
                 Degree = education.degree,
@@ -56,7 +56,7 @@ namespace MCC75_NET.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(EducationVM education)
+        public IActionResult Create(EducationUniversityVM education)
         {
             context.Add(new Education
             {
@@ -82,9 +82,9 @@ namespace MCC75_NET.Controllers
                     Value = u.Id.ToString(),
                     Text = u.Name
                 });
-            ViewBag.University = universities;
+            ViewBag.UniversityId = universities; ;
 
-            return View(new EducationVM
+            return View(new EducationUniversityVM
             {
                 Id = education.Id,
                 Degree = education.degree,
@@ -97,7 +97,7 @@ namespace MCC75_NET.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(EducationVM education)
+        public IActionResult Edit(EducationUniversityVM education)
         {
             var request = context.Educations.Find(education.Id);
             if (request != null)
@@ -120,7 +120,7 @@ namespace MCC75_NET.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Remove(EducationVM education)
+        public IActionResult Remove(EducationUniversityVM education)
         {
             var getId = context.Educations.Find(education.Id);
             context.Remove(getId);

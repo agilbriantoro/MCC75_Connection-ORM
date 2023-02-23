@@ -29,7 +29,7 @@ namespace MCC75_NET.ViewModels
 
         [Display(Name = "Phone Number")]
         [DataType(DataType.PhoneNumber)]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 
     public enum GenderEnum
