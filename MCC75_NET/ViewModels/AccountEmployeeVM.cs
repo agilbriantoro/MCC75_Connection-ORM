@@ -2,12 +2,12 @@
 
 namespace MCC75_NET.ViewModels
 {
-    public class LoginVM
+    public class AccountEmployeeVM
     {
-        [Display(Name = "E-Mail")]
         [EmailAddress]
-        public string Email { get; set; }
-        [DataType(DataType.Password)]
+        [Display(Name = "E-Mail")]
+        public string EmployeeEmail { get; set; }
         public string Password { get; set; }
+
     }
 }

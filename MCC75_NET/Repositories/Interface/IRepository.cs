@@ -1,5 +1,6 @@
 ﻿using MCC75_NET.Models;
 using MCC75_NET.Repositories;
+using MCC75_NET.ViewModels;
 
 namespace MCC75_NET.Repositories.Interface
 {

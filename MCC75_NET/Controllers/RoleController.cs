@@ -1,76 +1,144 @@
-﻿using MCC75_NET.Contexts;
+﻿using MCC75_NET.Models;
+using MCC75_NET.Repositories;
+using MCC75_NET.Contexts;
 using MCC75_NET.Models;
+using MCC75_NET.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace MCC75_NET.Controllers
+namespace MCC75_NET.Controllers;
+public class RoleController : Controller
 {
-    public class RoleController : Controller
-    {
-        private readonly MyContext context;
-        public RoleController(MyContext context)
-        {
-            this.context = context;
-        }
-        public IActionResult Index()
-        {
-            var roles = context.Roles.ToList();
-            return View(roles);
-        }
-        public IActionResult Details(int id)
-        {
-            var role = context.Roles.Find(id);
-            return View(role);
-        }
-        public IActionResult Create()
-        {
-            return View();
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(Role role)
-        {
-            context.Add(role);
-            var result = context.SaveChanges();
-            if (result > 0)
-                return RedirectToAction(nameof(Index));
-            return View();
-        }
-        public IActionResult Edit(int id)
-        {
-            var role = context.Roles.Find(id);
-            return View(role);
-        }
+    private readonly RoleRepository roleRepository;
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(Role role)
+    public RoleController(RoleRepository roleRepository)
+    {
+        this.roleRepository = roleRepository;
+    }
+
+    public IActionResult Index()
+    {
+        if (HttpContext.Session.GetString("email") == null)
         {
-            context.Entry(role).State = EntityState.Modified;
-            var result = context.SaveChanges();
-            if (result > 0)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            return View();
+            return RedirectToAction("Unauthorized", "Error");
         }
-        public IActionResult Delete(int id)
+        if (HttpContext.Session.GetString("role") != "Admin")
         {
-            var role = context.Roles.Find(id);
-            return View(role);
+            return RedirectToAction("Forbidden", "Error");
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Remove(int id)
+        var roles = roleRepository.GetAll();
+        return View(roles);
+    }
+    public IActionResult Details(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
         {
-            var role = context.Roles.Find(id);
-            context.Remove(role);
-            var result = context.SaveChanges();
-            if (result > 0)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            return View();
+            return RedirectToAction("Unauthorized", "Error");
         }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var role = roleRepository.GetById(id);
+        return View(role);
+    }
+
+    public IActionResult Create()
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Create(Role role)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var result = roleRepository.Insert(role);
+        if (result > 0)
+            return RedirectToAction(nameof(Index));
+        return View();
+    }
+
+    public IActionResult Edit(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var role = roleRepository.GetById(id);
+        return View(role);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Edit(Role role)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var result = roleRepository.Update(role);
+        if (result > 0)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return View();
+    }
+
+    public IActionResult Delete(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var role = roleRepository.GetById(id);
+        return View(role);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Remove(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var result = roleRepository.Delete(id);
+        if (result > 0)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return RedirectToAction(nameof(Delete));
     }
 }

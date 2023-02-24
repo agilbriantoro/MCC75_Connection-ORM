@@ -1,7 +1,7 @@
-﻿using MCC75_NET.Contexts;
-using MCC75_NET.Models;
+﻿using MCC75_NET.Models;
 using MCC75_NET.Repositories.Interface;
 using MCC75_NET.ViewModels;
+using MCC75_NET.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace MCC75_NET.Repositories
@@ -54,6 +54,16 @@ namespace MCC75_NET.Repositories
             context.Entry(entity).State = EntityState.Modified;
             result = context.SaveChanges();
             return result;
+        }
+
+        public object GetById(string employeesNik)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal string GetById()
+        {
+            throw new NotImplementedException();
         }
     }
 }

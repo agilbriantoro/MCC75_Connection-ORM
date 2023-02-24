@@ -1,93 +1,139 @@
-﻿using MCC75_NET.Contexts;
+﻿using MCC75_NET.Models;
+using MCC75_NET.Contexts;
 using MCC75_NET.Models;
-using MCC75_NET.ViewModels;
+using MCC75NET.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace MCC75_NET.Controllers
+namespace MCC75_NET.Controllers;
+public class UniversityController : Controller
 {
-    public class UniversityController : Controller
+    private readonly UniversityRepository repository;
+
+    public UniversityController(UniversityRepository repository)
     {
-        private readonly MyContext context;
-        private readonly UniversityVM universityVM;
-        public UniversityController(MyContext context)
-        {
-            this.context = context;
-        }
-        public IActionResult Index()
-        {
-            var universities = context.Universities.ToList();
-            return View(universities);
-        }
-        public IActionResult Details(int id)
-        {
-            var university = context.Universities.Find(id);
-            return View(new UniversityVM
-            {
-                Id = university.Id,
-                Name = university.Name,
-            });
-            /*var university = context.Universities.Find(id);
-            return View(university);*/
-        }
-        public IActionResult Create()
-        {
-            return View();
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(UniversityVM university)
-        {
-            context.Add(new University
-            {
-                Name = university.Name
-            });
-            var result = context.SaveChanges();
-            if (result > 0)
-                return RedirectToAction(nameof(Index));
-            return View();
-        }
-        public IActionResult Edit(int id)
-        {
-            var university = context.Universities.Find(id);
+        this.repository = repository;
+    }
 
-            return View(new UniversityVM
-            {
-                Id = university.Id,
-                Name = university.Name,
-            });
+    public IActionResult Index()
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
         }
+        var universities = repository.GetAll();
+        return View(universities);
+    }
+    public IActionResult Details(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        var university = repository.GetById(id);
+        return View(university);
+    }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(UniversityVM university)
+    public IActionResult Create()
+    {
+        if (HttpContext.Session.GetString("email") == null)
         {
-            var request = context.Universities.Find(university.Id);
-            if (request != null)
-            {
-                request.Name = university.Name;
-            }
-            var update = context.SaveChanges();
-            if (update > 0)
-                return RedirectToAction(nameof(Index));
-            return View();
+            return RedirectToAction("Unauthorized", "Error");
         }
-        public IActionResult Delete(int id)
+        if (HttpContext.Session.GetString("role") != "Admin")
         {
-            var university = context.Universities.Find(id);
-            return View();
+            return RedirectToAction("Forbidden", "Error");
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Remove(UniversityVM universityVM)
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Create(University university)
+    {
+        if (HttpContext.Session.GetString("email") == null)
         {
-            var university = context.Universities.Find(universityVM.Id);
-            context.Remove(university);
-            var result = context.SaveChanges();
-            if (result > 0)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            return View();
+            return RedirectToAction("Unauthorized", "Error");
         }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var result = repository.Insert(university);
+        if (result > 0)
+            return RedirectToAction(nameof(Index));
+        return View();
+    }
+
+    public IActionResult Edit(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var university = repository.GetById(id);
+        return View(university);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Edit(University university)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var result = repository.Update(university);
+        if (result > 0)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return View();
+    }
+
+    public IActionResult Delete(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var university = repository.GetById(id);
+        return View(university);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Remove(int id)
+    {
+        if (HttpContext.Session.GetString("email") == null)
+        {
+            return RedirectToAction("Unauthorized", "Error");
+        }
+        if (HttpContext.Session.GetString("role") != "Admin")
+        {
+            return RedirectToAction("Forbidden", "Error");
+        }
+        var result = repository.Delete(id);
+        if (result == 0)
+        {
+            // Data Tidak Ditemukan
+        }
+        else
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return RedirectToAction(nameof(Delete));
     }
 }

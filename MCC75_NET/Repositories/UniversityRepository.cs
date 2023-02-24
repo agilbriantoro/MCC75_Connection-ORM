@@ -1,54 +1,58 @@
-﻿using MCC75_NET.Contexts;
-using MCC75_NET.Models;
+﻿using MCC75_NET.Models;
 using MCC75_NET.Repositories.Interface;
+using MCC75_NET.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace MCC75_NET.Repositories
+namespace MCC75NET.Repositories;
+
+public class UniversityRepository : IRepository<int, University>
 {
-    public class UniversityRepository : IRepository<int, University>
+    private readonly MyContext context;
+    public UniversityRepository(MyContext context)
     {
-        private readonly MyContext context;
-        public UniversityRepository(MyContext context)
+        this.context = context;
+    }
+
+    public int Delete(int key)
+    {
+        int result = 0;
+        var university = GetById(key);
+        if (university == null)
         {
-            this.context = context;
-        }
-        public int Delete(int key)
-        {
-            int result = 0;
-            var university = GetById(key);
-            if (university == null)
-            {
-                return result;
-            }
-            context.Remove(university);
-            result = context.SaveChanges();
             return result;
         }
 
-        public List<University> GetAll()
-        {
-            return context.Universities.ToList() ?? null;
-        }
+        context.Remove(university);
+        result = context.SaveChanges();
 
-        public University GetById(int key)
-        {
-            return context.Universities.Find(key) ?? null;
-        }
+        return result;
+    }
 
-        public int Insert(University entity)
-        {
-            int result = 0;
-            context.Add(entity);
-            result = context.SaveChanges();
-            return result;
-        }
+    public List<University> GetAll()
+    {
+        return context.Universities.ToList() ?? null;
+    }
 
-        public int Update(University entity)
-        {
-            int result = 0;
-            context.Entry(entity).State = EntityState.Modified;
-            result = context.SaveChanges();
-            return result;
-        }
+    public University GetById(int key)
+    {
+        return context.Universities.Find(key) ?? null;
+    }
+
+    public int Insert(University entity)
+    {
+        int result = 0;
+        context.Add(entity);
+        result = context.SaveChanges();
+
+        return result;
+    }
+
+    public int Update(University entity)
+    {
+        int result = 0;
+        context.Entry(entity).State = EntityState.Modified;
+        result = context.SaveChanges();
+
+        return result;
     }
 }

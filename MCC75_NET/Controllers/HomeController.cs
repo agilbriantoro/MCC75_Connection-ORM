@@ -1,9 +1,10 @@
-﻿using MCC75_NET.Models;
+﻿using MCC75_NET.ViewModels;
+using MCC75_NET.Models;
 using MCC75_NET.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace MCC75_NET.Controllers
+namespace MCC75NET.Controllers
 {
     public class HomeController : Controller
     {

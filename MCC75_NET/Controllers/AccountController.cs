@@ -1,28 +1,96 @@
-﻿using MCC75_NET.Contexts;
-using MCC75_NET.Models;
+﻿using MCC75_NET.Repositories;
 using MCC75_NET.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
-namespace MCC75_NET.Controllers
+namespace MCC75_NET.Controllers;
+public class AccountController : Controller
 {
-    public class AccountController : Controller
+    private readonly AccountRepository accountRepository;
+    private readonly MCC75_NET.Repositories.EmployeeRepository employeeRepository;
+
+    public AccountController(AccountRepository accountRepository, MCC75_NET.Repositories.EmployeeRepository employeeRepository)
     {
+        this.accountRepository = accountRepository;
+        this.employeeRepository = employeeRepository;
+    }
 
-        public AccountController(MyContext context)
-        {
-            this.context = context;
-        }
+    public IActionResult Index()
+    {
+        var results = accountRepository.GetAccountEmployees();
+        return View(results);
+    }
+    //public IActionResult Details(string id)
+    //{
+    //    return View(accountRepository.GetByIdAccount(id));
+    //}
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+    //public IActionResult Create()
+    //{
+    //    return View();
+    //}
 
-        // GET : Account/Register
-        public IActionResult Register()
-        {
-            var genders = new List<SelectListItem>{
+    //[HttpPost]
+    //[ValidateAntiForgeryToken]
+    //public IActionResult Create(Account account)
+    //{
+    //    var result = accountRepository.Insert(account);
+    //    if (result > 0)
+    //        return RedirectToAction(nameof(Index));
+    //    return View();
+    //}
+
+    //public IActionResult Edit(string id)
+    //{
+    //    var account = accountRepository.GetById(id);
+    //    return View(account);
+    //}
+
+    //[HttpPost]
+    //[ValidateAntiForgeryToken]
+    //public IActionResult Edit(Account account)
+    //{
+    //    var result = accountRepository.Update(account);
+    //    if (result > 0)
+    //    {
+    //        return RedirectToAction(nameof(Index));
+    //    }
+    //    return View();
+    //}
+
+    //public IActionResult Delete(string id)
+    //{
+    //    var account = accountRepository.GetById(id);
+    //    return View(new AccountEmployeeVM
+    //    {
+    //        Password = account.Password,
+    //        EmployeeEmail =  employeeRepository.GetById(account.EmployeeNIK).Email,
+    //    });
+    //}
+
+    //[HttpPost]
+    //[ValidateAntiForgeryToken]
+    //public IActionResult Remove(string nik)
+    //{
+    //    var result = accountRepository.Delete(nik);
+    //    if (result == 0)
+    //    {
+    //        // Data Tidak Ditemukan
+    //    }
+    //    else
+    //    {
+    //        return RedirectToAction(nameof(Index));
+    //    }
+    //    return RedirectToAction(nameof(Delete));
+    //}
+
+    // GET : Account/Register
+    public IActionResult Register()
+    {
+        var gender = new List<SelectListItem>{
             new SelectListItem
             {
                 Value = "0",
@@ -32,83 +100,58 @@ namespace MCC75_NET.Controllers
             {
                 Value = "1",
                 Text = "Female"
-            },
+            }
         };
-
-            ViewBag.Genders = genders;
-            return View();
-        }
-
-        // POST : Account/Register
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Register(RegisterVM registerVM)
+        ViewBag.Gender = gender;
+        return View();
+    }
+    // POST : Account/Register
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Register(RegisterVM registerVM)
+    {
+        if (ModelState.IsValid)
         {
-            if (ModelState.IsValid)
-            {
-                // Bikin kondisi untuk mengecek apakah data university sudah ada
-                University university = new University
-                {
-                    Name = registerVM.UniversityName
-                };
-                context.Universities.Add(university);
-                context.SaveChanges();
+            accountRepository.Register(registerVM);
 
-                Education education = new Education
-                {
-                    Major = registerVM.Major,
-                    degree = registerVM.Degree,
-                    Gpa = (float)registerVM.GPA,
-                    UniversityId = university.Id
-                };
-                context.Educations.Add(education);
-                context.SaveChanges();
-
-                Employee employee = new Employee
-                {
-                    NIK = registerVM.NIK,
-                    FirstName = registerVM.FirstName,
-                    LastName = registerVM.LastName,
-                    BirthDate = registerVM.BirthDate,
-                    Gender = (Models.GenderEnum)registerVM.Gender,
-                    HiringDate = registerVM.HiringDate,
-                    Email = registerVM.Email,
-                    PhoneNumber = registerVM.PhoneNumber,
-                };
-                context.Employees.Add(employee);
-                context.SaveChanges();
-
-                Account account = new Account
-                {
-                return RedirectToAction("Index", "Home");
-            }
-            return View();
+            return RedirectToAction("Index", "Home");
         }
 
-        // GET : Account/Login
-        public IActionResult Login()
+        return View();
+    }
+
+    //Login
+    //GET : Account/Login
+    public IActionResult Login()
+    {
+        return View();
+    }
+
+    //POST : Account/Login
+    // Parameter LoginVM {Email, Password}
+    // Validasi Email exist?, Password equal?
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Login(LoginVM loginVM)
+    {
+        if (accountRepository.Login(loginVM))
         {
-            return View();
-        }
+            var userdata = accountRepository.GetUserdata(loginVM.Email);
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginVM loginVM)
-        {
-            var getAccounts = context.Employees.Join(
-            context.Accounts,
-            e => e.NIK,
-            a => a.EmployeesNik,
-            (e, a) => new LoginVM
-            {
-                Email = e.Email,
-                Password = a.Password
-            });
+            HttpContext.Session.SetString("email", userdata.Email);
+            HttpContext.Session.SetString("fullName", userdata.FullName);
+            HttpContext.Session.SetString("role", userdata.Role);
 
-                return RedirectToAction("Index", "Home");
-            }
-            ModelState.AddModelError(string.Empty, "Account or Password Not Found!");
-            return View();
+            return RedirectToAction("Index", "Home");
         }
+        ModelState.AddModelError(string.Empty, "E-Mail or Password Not Found!");
+
+        return View();
+    }
+
+    public IActionResult Logout()
+    {
+        HttpContext.Session.Clear();
+        return RedirectToAction(nameof(Index), "Home");
     }
 }

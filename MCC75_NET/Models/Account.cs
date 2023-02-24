@@ -13,7 +13,7 @@ namespace MCC75_NET.Models
 
         // Cardinality
         public ICollection<AccountRole>? accountRoles { get; set; } 
-        public Employee? employee { get; set; } 
-
+        public Employee? employee { get; set; }
+        public object EmployeeNIK { get; set; }
     }
 }
