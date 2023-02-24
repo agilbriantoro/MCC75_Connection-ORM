@@ -45,7 +45,6 @@ namespace MCC75_NET.Repositories
             return result;
         }
 
-        // Edit
         public int Update(Education entity)
         {
             int result = 0;
